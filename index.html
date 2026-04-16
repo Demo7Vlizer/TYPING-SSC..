@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSC Typing Test Practice</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <div class="page-header">
+        <div>
+          <h1>SSC Typing Test Practice</h1>
+          <p class="subtitle">
+            Paste your passage, choose language + duration, then start typing.
+          </p>
+        </div>
+        <button id="themeToggleBtn" class="secondary" type="button">Light Mode</button>
+      </div>
+
+      <section class="card">
+        <label for="sourceText">Passage / Sentences (paste here)</label>
+        <textarea
+          id="sourceText"
+          rows="8"
+          placeholder="Paste your paragraph here..."
+        ></textarea>
+
+        <div class="settings">
+          <label>
+            Language
+            <select id="languageSelect">
+              <option value="english">English</option>
+              <option value="hindi">Hindi</option>
+            </select>
+          </label>
+
+          <label>
+            Duration (minutes)
+            <select id="durationSelect">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="15">15</option>
+            </select>
+          </label>
+        </div>
+
+        <button id="startBtn">Start Test</button>
+      </section>
+
+      <section class="card">
+        <h2>Notes (Saved Locally)</h2>
+        <p class="small-note">Save useful paragraphs in your browser and load them anytime.</p>
+        <label for="noteTitle">Note Title</label>
+        <input id="noteTitle" type="text" placeholder="Example: Practice Paragraph 1" />
+
+        <label for="noteText" class="mt-10">Note Paragraph</label>
+        <textarea
+          id="noteText"
+          rows="5"
+          placeholder="Write or paste paragraph to save..."
+        ></textarea>
+
+        <div class="actions mt-10">
+          <button id="saveNoteBtn" type="button">Save Note</button>
+          <button id="copyPassageBtn" class="secondary" type="button">Use Passage Text</button>
+        </div>
+
+        <div class="settings">
+          <label>
+            Saved Notes
+            <select id="savedNotesSelect">
+              <option value="">No saved notes yet</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="loadNoteBtn" class="secondary" type="button">Load to Passage</button>
+          <button id="deleteNoteBtn" class="danger" type="button">Delete Note</button>
+        </div>
+      </section>
+
+      <section id="testPanel" class="card hidden">
+        <div class="topbar">
+          <div><strong>Time Left:</strong> <span id="timeLeft">00:00</span></div>
+          <div><strong>Status:</strong> <span id="statusLabel">Ready</span></div>
+        </div>
+
+        <div id="displayText" class="display-text"></div>
+
+        <label for="typingInput">Type Here</label>
+        <textarea
+          id="typingInput"
+          rows="7"
+          placeholder="Start typing the above passage..."
+        ></textarea>
+
+        <div class="actions">
+          <button id="finishBtn" class="secondary">Finish Early</button>
+          <button id="resetBtn" class="danger">Reset</button>
+        </div>
+      </section>
+
+      <section id="resultPanel" class="card hidden">
+        <h2>Result</h2>
+        <div class="result-grid">
+          <div class="metric-card">
+            <p class="metric-label">Total Typed Strokes</p>
+            <p class="metric-value"><span id="rStrokes">0</span></p>
+          </div>
+          <div class="metric-card">
+            <p class="metric-label">Total Words (strokes/5)</p>
+            <p class="metric-value"><span id="rWords">0</span></p>
+          </div>
+          <div class="metric-card">
+            <p class="metric-label">Tentative Speed</p>
+            <p class="metric-value"><span id="rTentative">0</span> <span class="unit">WPM</span></p>
+          </div>
+          <div class="metric-card">
+            <p class="metric-label">Mistakes</p>
+            <p class="metric-value"><span id="rMistakes">0</span></p>
+          </div>
+          <div class="metric-card">
+            <p class="metric-label">Net Speed</p>
+            <p class="metric-value"><span id="rNet">0</span> <span class="unit">WPM</span></p>
+          </div>
+          <div class="metric-card">
+            <p class="metric-label">Marks</p>
+            <p class="metric-value"><span id="rMarks">0</span></p>
+          </div>
+          <div class="metric-card">
+            <p class="metric-label">Qualifying</p>
+            <p class="metric-value"><span id="rQualify">No</span></p>
+          </div>
+        </div>
+        <div id="mistakeDetails" class="mistake-details hidden">
+          <h3>Mistake Details</h3>
+          <p class="small-note">Wrong words are highlighted below.</p>
+          <div id="mistakePreview" class="mistake-preview"></div>
+          <div id="mistakeList" class="mistake-list"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js?v=7"></script>
+  </body>
+</html>
