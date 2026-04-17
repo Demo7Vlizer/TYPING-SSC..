@@ -132,7 +132,17 @@ function autoScrollPassageToProgress(typedLength) {
 
   const progress = Math.min(1, Math.max(0, typedLength / activePassage.length));
   const scrollMax = Math.max(0, displayText.scrollHeight - displayText.clientHeight);
-  const target = scrollMax * progress;
+
+  // Scroll slightly ahead so the next line isn't hidden at the bottom
+  // when the user types fast.
+  const lookAhead = 0.08; // 8% ahead of current progress
+  const targetProgress = Math.min(1, progress + lookAhead);
+
+  // Keep the "current position" a bit above the bottom for readability.
+  const comfortOffset = displayText.clientHeight * 0.35;
+  const rawTarget = scrollMax * targetProgress - comfortOffset;
+  const target = Math.min(scrollMax, Math.max(0, rawTarget));
+
   displayText.scrollTop = target;
 }
 
