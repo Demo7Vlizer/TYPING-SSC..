@@ -42,6 +42,9 @@ let startedAtMs = 0;
 const THEME_STORAGE_KEY = "ssc_typing_theme";
 const NOTES_STORAGE_KEY = "ssc_typing_notes";
 const AUTOSCROLL_STORAGE_KEY = "ssc_typing_autoscroll";
+let scrollAnchor = null; // { typedLength: number, scrollTop: number }
+let isAutoScrolling = false;
+let manualScrollHoldUntilMs = 0;
 
 function formatTime(seconds) {
   const mins = Math.floor(seconds / 60)
@@ -129,8 +132,10 @@ function autoScrollPassageToProgress(typedLength) {
   if (!autoScrollToggle?.checked) return;
   if (!displayText) return;
   if (!activePassage) return;
+  if (Date.now() < manualScrollHoldUntilMs) return;
 
-  const progress = Math.min(1, Math.max(0, typedLength / activePassage.length));
+  const passageLength = activePassage.length;
+  const progress = Math.min(1, Math.max(0, typedLength / passageLength));
   const scrollMax = Math.max(0, displayText.scrollHeight - displayText.clientHeight);
 
   // Scroll slightly ahead so the next line isn't hidden at the bottom
@@ -140,10 +145,27 @@ function autoScrollPassageToProgress(typedLength) {
 
   // Keep the "current position" a bit above the bottom for readability.
   const comfortOffset = displayText.clientHeight * 0.35;
-  const rawTarget = scrollMax * targetProgress - comfortOffset;
+  const anchorTypedProgress = scrollAnchor
+    ? Math.min(1, Math.max(0, scrollAnchor.typedLength / passageLength))
+    : 0;
+  const anchorScrollTop = scrollAnchor ? scrollAnchor.scrollTop : 0;
+
+  // If user manually scrolled, continue from that pixel position.
+  const baseScrollTop = scrollAnchor
+    ? anchorScrollTop + (targetProgress - anchorTypedProgress) * scrollMax
+    : scrollMax * targetProgress;
+
+  const rawTarget = baseScrollTop - comfortOffset;
   const target = Math.min(scrollMax, Math.max(0, rawTarget));
 
+  isAutoScrolling = true;
   displayText.scrollTop = target;
+  // Let the browser apply scrollTop first, then re-enable manual tracking.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      isAutoScrolling = false;
+    });
+  });
 }
 
 function getSavedNotes() {
@@ -328,6 +350,7 @@ startBtn.addEventListener("click", () => {
   activePassage = text;
   displayText.textContent = activePassage;
   displayText.scrollTop = 0;
+  scrollAnchor = null;
   typingInput.value = "";
   typingInput.disabled = false;
   typingInput.focus();
@@ -441,6 +464,8 @@ resetBtn.addEventListener("click", () => {
   totalSeconds = 0;
   activePassage = "";
   startedAtMs = 0;
+  scrollAnchor = null;
+  manualScrollHoldUntilMs = 0;
   if (notesPanel) notesPanel.classList.remove("hidden");
   typingInput.value = "";
   typingInput.disabled = true;
@@ -457,3 +482,16 @@ resetBtn.addEventListener("click", () => {
 initializeTheme();
 renderSavedNotes();
 initializeAutoScroll();
+
+displayText?.addEventListener("scroll", () => {
+  if (!autoScrollToggle?.checked) return;
+  if (!isRunning) return;
+  if (!activePassage) return;
+  if (isAutoScrolling) return;
+
+  manualScrollHoldUntilMs = Date.now() + 900; // pause auto-scroll while user scrolls
+  scrollAnchor = {
+    typedLength: typingInput.value.length,
+    scrollTop: displayText.scrollTop,
+  };
+});
