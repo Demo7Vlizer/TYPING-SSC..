@@ -3,6 +3,7 @@ const languageSelect = document.getElementById("languageSelect");
 const durationSelect = document.getElementById("durationSelect");
 const startBtn = document.getElementById("startBtn");
 const themeToggleBtn = document.getElementById("themeToggleBtn");
+const notesPanel = document.getElementById("notesPanel");
 const noteTitle = document.getElementById("noteTitle");
 const noteText = document.getElementById("noteText");
 const saveNoteBtn = document.getElementById("saveNoteBtn");
@@ -16,6 +17,7 @@ const displayText = document.getElementById("displayText");
 const typingInput = document.getElementById("typingInput");
 const timeLeft = document.getElementById("timeLeft");
 const statusLabel = document.getElementById("statusLabel");
+const autoScrollToggle = document.getElementById("autoScrollToggle");
 const finishBtn = document.getElementById("finishBtn");
 const resetBtn = document.getElementById("resetBtn");
 
@@ -39,6 +41,7 @@ let isRunning = false;
 let startedAtMs = 0;
 const THEME_STORAGE_KEY = "ssc_typing_theme";
 const NOTES_STORAGE_KEY = "ssc_typing_notes";
+const AUTOSCROLL_STORAGE_KEY = "ssc_typing_autoscroll";
 
 function formatTime(seconds) {
   const mins = Math.floor(seconds / 60)
@@ -108,6 +111,29 @@ function initializeTheme() {
   }
   // Default theme is dark mode.
   applyTheme("dark");
+}
+
+function setAutoScrollEnabled(enabled) {
+  if (!autoScrollToggle) return;
+  autoScrollToggle.checked = enabled;
+  localStorage.setItem(AUTOSCROLL_STORAGE_KEY, enabled ? "1" : "0");
+}
+
+function initializeAutoScroll() {
+  if (!autoScrollToggle) return;
+  const saved = localStorage.getItem(AUTOSCROLL_STORAGE_KEY);
+  autoScrollToggle.checked = saved === "1";
+}
+
+function autoScrollPassageToProgress(typedLength) {
+  if (!autoScrollToggle?.checked) return;
+  if (!displayText) return;
+  if (!activePassage) return;
+
+  const progress = Math.min(1, Math.max(0, typedLength / activePassage.length));
+  const scrollMax = Math.max(0, displayText.scrollHeight - displayText.clientHeight);
+  const target = scrollMax * progress;
+  displayText.scrollTop = target;
 }
 
 function getSavedNotes() {
@@ -239,6 +265,7 @@ function endTest() {
   clearInterval(timerId);
   statusLabel.textContent = "Finished";
   typingInput.disabled = true;
+  if (notesPanel) notesPanel.classList.remove("hidden");
 
   const typed = typingInput.value;
   const typedStrokes = typed.length;
@@ -287,8 +314,10 @@ startBtn.addEventListener("click", () => {
     return;
   }
 
+  if (notesPanel) notesPanel.classList.add("hidden");
   activePassage = text;
   displayText.textContent = activePassage;
+  displayText.scrollTop = 0;
   typingInput.value = "";
   typingInput.disabled = false;
   typingInput.focus();
@@ -379,6 +408,7 @@ typingInput.addEventListener("input", () => {
   if (!isRunning) return;
 
   const typed = typingInput.value;
+  autoScrollPassageToProgress(typed.length);
   const hasCompleted = typed.length >= activePassage.length;
 
   if (hasCompleted) {
@@ -389,6 +419,11 @@ typingInput.addEventListener("input", () => {
   statusLabel.textContent = "Running";
 });
 
+autoScrollToggle?.addEventListener("change", () => {
+  setAutoScrollEnabled(autoScrollToggle.checked);
+  autoScrollPassageToProgress(typingInput.value.length);
+});
+
 resetBtn.addEventListener("click", () => {
   clearInterval(timerId);
   isRunning = false;
@@ -396,6 +431,7 @@ resetBtn.addEventListener("click", () => {
   totalSeconds = 0;
   activePassage = "";
   startedAtMs = 0;
+  if (notesPanel) notesPanel.classList.remove("hidden");
   typingInput.value = "";
   typingInput.disabled = true;
   displayText.textContent = "";
@@ -410,3 +446,4 @@ resetBtn.addEventListener("click", () => {
 
 initializeTheme();
 renderSavedNotes();
+initializeAutoScroll();

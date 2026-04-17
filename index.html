@@ -56,7 +56,7 @@
         <button id="startBtn">Start Test</button>
       </section>
 
-      <section class="card">
+      <section id="notesPanel" class="card">
         <h2>Notes (Saved Locally)</h2>
         <p class="small-note">Save useful paragraphs in your browser and load them anytime.</p>
         <label for="noteTitle">Note Title</label>
@@ -92,7 +92,13 @@
       <section id="testPanel" class="card hidden">
         <div class="topbar">
           <div><strong>Time Left:</strong> <span id="timeLeft">00:00</span></div>
-          <div><strong>Status:</strong> <span id="statusLabel">Ready</span></div>
+          <div class="topbar-right">
+            <label class="toggle">
+              <input id="autoScrollToggle" type="checkbox" />
+              <span>Auto-scroll passage</span>
+            </label>
+            <div><strong>Status:</strong> <span id="statusLabel">Ready</span></div>
+          </div>
         </div>
 
         <div id="displayText" class="display-text"></div>
@@ -151,6 +157,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=7"></script>
+    <script src="script.js?v=9"></script>
   </body>
 </html>
